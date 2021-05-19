@@ -14,9 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
     // Route::post('register', 'UserController@register');
-    Route::post('register', 'App\Http\Controllers\UserController@register');
+    Route::post('register/admin', 'App\Http\Controllers\UserController@register_admin');
+    Route::post('register/player', 'App\Http\Controllers\UserController@register_player');
+    Route::delete('player/delete', 'App\Http\Controllers\UserController@remove_player');
     Route::post('login', 'App\Http\Controllers\UserController@authenticate');
-    Route::get('open', 'DataController@open');
 
     Route::group(['middleware' => ['jwt.verify']], function() {
         Route::get('user', 'App\Http\Controllers\UserController@getAuthenticatedUser');
