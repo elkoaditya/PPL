@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\QueryBuilderServiceProvider;
 use Throwable;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
@@ -80,20 +82,56 @@ class UserController extends Controller
             return response()->json($validator->errors(), 400);
         }
 
-        $response = User::where('id', $req->id)->delete();
-        
+        $response = User::where('id', $req->id)
+                    ->where('role', 'player')
+                    ->delete();
+
         if(!$response){
             return response()->json([
                 'status' => "Data user gagal di Hapus"
             ]);
+        }else{
+            $id = (int)$req->id;
+            return response()->json([
+                'status' => "Id Player ".$id." Berhasil di Hapus",
+            ]);
         }
-        return response()->json(compact('response'));
-        
+    }
+    public function update_player(Request $req){
+        $validator = Validator::make($req->all(), [
+            'id' => 'required|integer|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|max:255',
+            'password' => 'required|string|max:255',
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->errors(), 500);
+        }
+        $response = User::where('id', $req->id)
+                    ->where('role', 'player')
+                    ->update([
+                        'name' => $req->name,
+                        'email' => $req->email,
+                        'password' => Hash::make($req->get('password')),
+                    ]);
+        if(!$response){
+            return response()->json([
+                'status' => "Data Player gagal di Update",
+            ]);
+        } else {
+            return response()->json([
+                'status' => "Berhasil",
+            ]);
+        }
+    }
+    public function get_player(Request $req){
+        $userPlayer = QueryBuilder::for(User::class)->allowedFilters('name')->get();
+        return response()->json(compact('userPlayer'));
     }
 
     /********************************************************************************************************* */
     public function getAuthenticatedUser(){
-        $allUser = User::get();
+        $allUser = QueryBuilder::for(User::class)->allowedFilters('name')->get();
         return response()->json(compact('allUser'));
     }
     public function isLogin() {

@@ -1,0 +1,5 @@
+{
+    "require": {
+        "spatie/laravel-query-builder": "^3.4"
+    }
+}
